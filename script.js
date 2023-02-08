@@ -549,4 +549,40 @@ function loopClusters(func) {
   }
 }
 
+// AUTO CLEAR CLUSTERS
+function removeClusters() {
+  loopClusters(function (index, column, row, cluster) {
+    level.tiles[column][row].type = -1;
+  });
+
+  for (var i = 0; i < level.columns; i++) {
+    var shift = 0;
+    for (var j = level.rows - 1; j >= 0; j--) {
+      if (level.tiles[i][j].type == -1) {
+        shift++;
+        level.tiles[i][j].shift = 0;
+      } else {
+        level.tiles[i][j].shift = shift;
+      }
+    }
+  }
+}
+
+function shiftTiles() {
+  for (var i = 0; i < level.columns; i++) {
+    for (var j = level.rows - 1; j >= 0; j--) {
+      if (level.tiles[i][j].type == -1) {
+        level.tiles[i][j].type = getRandomTile();
+      } else {
+        var shift = level.tiles[i][j].shift;
+        if (shift > 0) {
+          swap(i, j, i, j + shift);
+        }
+      }
+
+      level.tiles[i][j].shift = 0;
+    }
+  }
+}
+
 };
