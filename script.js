@@ -259,5 +259,77 @@ window.onload = function () {
         }
       }
     }
+    if (
+      gamestate == gamestates.resolve &&
+      (animationstate == 2 || animationstate == 3)
+    ) {
+      var shiftx = currentmove.column2 - currentmove.column1;
+      var shifty = currentmove.row2 - currentmove.row1;
 
+      var coord1 = getTileCoordinate(
+        currentmove.column1,
+        currentmove.row1,
+        0,
+        0
+      );
+      var coord1shift = getTileCoordinate(
+        currentmove.column1,
+        currentmove.row1,
+        (animationtime / animationtimetotal) * shiftx,
+        (animationtime / animationtimetotal) * shifty
+      );
+      var col1 =
+        tilecolors[level.tiles[currentmove.column1][currentmove.row1].type];
+
+      var coord2 = getTileCoordinate(
+        currentmove.column2,
+        currentmove.row2,
+        0,
+        0
+      );
+      var coord2shift = getTileCoordinate(
+        currentmove.column2,
+        currentmove.row2,
+        (animationtime / animationtimetotal) * -shiftx,
+        (animationtime / animationtimetotal) * -shifty
+      );
+      var col2 =
+        tilecolors[level.tiles[currentmove.column2][currentmove.row2].type];
+
+      drawTile(coord1.tilex, coord1.tiley, 0, 0, 0);
+      drawTile(coord2.tilex, coord2.tiley, 0, 0, 0);
+
+      if (animationstate == 2) {
+        drawTile(
+          coord1shift.tilex,
+          coord1shift.tiley,
+          col1[0],
+          col1[1],
+          col1[2]
+        );
+        drawTile(
+          coord2shift.tilex,
+          coord2shift.tiley,
+          col2[0],
+          col2[1],
+          col2[2]
+        );
+      } else {
+        drawTile(
+          coord2shift.tilex,
+          coord2shift.tiley,
+          col2[0],
+          col2[1],
+          col2[2]
+        );
+        drawTile(
+          coord1shift.tilex,
+          coord1shift.tiley,
+          col1[0],
+          col1[1],
+          col1[2]
+        );
+      }
+    }
+  }
 };
