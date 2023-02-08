@@ -585,4 +585,157 @@ function shiftTiles() {
   }
 }
 
+function getMouseTile(pos) {
+  var tx = Math.floor((pos.x - level.x) / level.tilewidth);
+  var ty = Math.floor((pos.y - level.y) / level.tileheight);
+
+  if (tx >= 0 && tx < level.columns && ty >= 0 && ty < level.rows) {
+    return {
+      valid: true,
+      x: tx,
+      y: ty,
+    };
+  }
+
+  return {
+    valid: false,
+    x: 0,
+    y: 0,
+  };
+}
+
+function canSwap(x1, y1, x2, y2) {
+  if (
+    (Math.abs(x1 - x2) == 1 && y1 == y2) ||
+    (Math.abs(y1 - y2) == 1 && x1 == x2)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function swap(x1, y1, x2, y2) {
+  var typeswap = level.tiles[x1][y1].type;
+  level.tiles[x1][y1].type = level.tiles[x2][y2].type;
+  level.tiles[x2][y2].type = typeswap;
+}
+
+function mouseSwap(c1, r1, c2, r2) {
+  currentmove = { column1: c1, row1: r1, column2: c2, row2: r2 };
+
+  level.selectedtile.selected = false;
+
+  animationstate = 2;
+  animationtime = 0;
+  gamestate = gamestates.resolve;
+}
+
+function onMouseMove(e) {
+  var pos = getMousePos(canvas, e);
+
+  if (drag && level.selectedtile.selected) {
+    mt = getMouseTile(pos);
+    if (mt.valid) {
+
+      if (
+        canSwap(mt.x, mt.y, level.selectedtile.column, level.selectedtile.row)
+      ) {
+        mouseSwap(
+          mt.x,
+          mt.y,
+          level.selectedtile.column,
+          level.selectedtile.row
+        );
+      }
+    }
+  }
+}
+
+function onMouseDown(e) {
+  var pos = getMousePos(canvas, e);
+
+  if (!drag) {
+    mt = getMouseTile(pos);
+
+    if (mt.valid) {
+      var swapped = false;
+      if (level.selectedtile.selected) {
+        if (
+          mt.x == level.selectedtile.column &&
+          mt.y == level.selectedtile.row
+        ) {
+          level.selectedtile.selected = false;
+          drag = true;
+          return;
+        } else if (
+          canSwap(
+            mt.x,
+            mt.y,
+            level.selectedtile.column,
+            level.selectedtile.row
+          )
+        ) {
+          mouseSwap(
+            mt.x,
+            mt.y,
+            level.selectedtile.column,
+            level.selectedtile.row
+          );
+          swapped = true;
+        }
+      }
+
+      if (!swapped) {
+        level.selectedtile.column = mt.x;
+        level.selectedtile.row = mt.y;
+        level.selectedtile.selected = true;
+      }
+    } else {
+      level.selectedtile.selected = false;
+    }
+
+    drag = true;
+  }
+
+  for (var i = 0; i < buttons.length; i++) {
+    if (
+      pos.x >= buttons[i].x &&
+      pos.x < buttons[i].x + buttons[i].width &&
+      pos.y >= buttons[i].y &&
+      pos.y < buttons[i].y + buttons[i].height
+    ) {
+      if (i == 0) {
+        newGame();
+      } else if (i == 1) {
+        showmoves = !showmoves;
+        buttons[i].text = (showmoves ? "Hide" : "Show") + " Moves";
+      }
+    }
+  }
+}
+
+function onMouseUp(e) {
+  drag = false;
+}
+
+function onMouseOut(e) {
+  drag = false;
+}
+
+function getMousePos(canvas, e) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: Math.round(
+      ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
+    ),
+    y: Math.round(
+      ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
+    ),
+  };
+}
+
+// INITIAL START
+init();
+
 };
