@@ -38,11 +38,11 @@ window.onload = function () {
   var showmoves = false;
   var gameover = false;
 
-    // BUTTONS
-    var buttons = [
-      { x: 30, y: 240, width: 150, height: 50, text: "New Game" },
-      { x: 30, y: 300, width: 150, height: 50, text: "Show Moves" },
-    ];
+  // BUTTONS
+  var buttons = [
+    { x: 30, y: 240, width: 150, height: 50, text: "New Game" },
+    { x: 30, y: 300, width: 150, height: 50, text: "Show Moves" },
+  ];
 
   // GAME INITIALIZATION FUNCTION
   function init() {
@@ -75,7 +75,6 @@ window.onload = function () {
     lastframe = tframe;
 
     if (gamestate == gamestates.ready) {
-
       if (moves.length <= 0) {
         gameover = true;
       }
@@ -156,7 +155,6 @@ window.onload = function () {
     context.fillText(text, x + (width - textdim.width) / 2, y);
   }
 
-
   function render() {
     drawFrame();
 
@@ -171,7 +169,6 @@ window.onload = function () {
     var levelheight = level.rows * level.tileheight;
     context.fillStyle = "#000000";
     context.fillRect(level.x - 4, level.y - 4, levelwidth + 8, levelheight + 8);
-
 
     renderTiles();
     renderClusters();
@@ -353,7 +350,7 @@ window.onload = function () {
         context.fillRect(
           coord.tilex,
           coord.tiley,
-          (clusters[i].length) * level.tilewidth,
+          clusters[i].length * level.tilewidth,
           40
         );
       } else {
@@ -362,7 +359,7 @@ window.onload = function () {
           coord.tilex,
           coord.tiley,
           40,
-          (clusters[i].length) * level.tileheight
+          clusters[i].length * level.tileheight
         );
       }
     }
@@ -387,294 +384,258 @@ window.onload = function () {
     }
   }
 
- // START NEW GAME
- function newGame() {
-  score = 0;
-  gamestate = gamestates.ready;
-  gameover = false;
+  // START NEW GAME
+  function newGame() {
+    score = 0;
+    gamestate = gamestates.ready;
+    gameover = false;
 
-  createLevel();
-  findMoves();
-  findClusters();
-}
-
-function createLevel() {
-  var done = false;
-
-  while (!done) {
-    for (var i = 0; i < level.columns; i++) {
-      for (var j = 0; j < level.rows; j++) {
-        level.tiles[i][j].type = getRandomTile();
-      }
-    }
-
-    resolveClusters();
+    createLevel();
     findMoves();
-
-    if (moves.length > 0) {
-      done = true;
-    }
-  }
-}
-
-function getRandomTile() {
-  return Math.floor(Math.random() * tilecolors.length);
-}
-
-function resolveClusters() {
-  findClusters();
-
-  while (clusters.length > 0) {
-    removeClusters();
-    shiftTiles();
     findClusters();
   }
-}
 
-function findClusters() {
-  clusters = [];
+  function createLevel() {
+    var done = false;
 
-  for (var j = 0; j < level.rows; j++) {
-    var matchlength = 1;
-    for (var i = 0; i < level.columns; i++) {
-      var checkcluster = false;
-
-      if (i == level.columns - 1) {
-        checkcluster = true;
-      } else {
-        if (
-          level.tiles[i][j].type == level.tiles[i + 1][j].type &&
-          level.tiles[i][j].type != -1
-        ) {
-          matchlength += 1;
-        } else {
-          checkcluster = true;
+    while (!done) {
+      for (var i = 0; i < level.columns; i++) {
+        for (var j = 0; j < level.rows; j++) {
+          level.tiles[i][j].type = getRandomTile();
         }
       }
 
-      if (checkcluster) {
-        if (matchlength >= 3) {
-          clusters.push({
-            column: i + 1 - matchlength,
-            row: j,
-            length: matchlength,
-            horizontal: true,
-          });
-        }
+      resolveClusters();
+      findMoves();
 
-        matchlength = 1;
+      if (moves.length > 0) {
+        done = true;
       }
     }
   }
 
-  for (var i = 0; i < level.columns; i++) {
-    var matchlength = 1;
+  function getRandomTile() {
+    return Math.floor(Math.random() * tilecolors.length);
+  }
+
+  function resolveClusters() {
+    findClusters();
+
+    while (clusters.length > 0) {
+      removeClusters();
+      shiftTiles();
+      findClusters();
+    }
+  }
+
+  function findClusters() {
+    clusters = [];
+
     for (var j = 0; j < level.rows; j++) {
-      var checkcluster = false;
+      var matchlength = 1;
+      for (var i = 0; i < level.columns; i++) {
+        var checkcluster = false;
 
-      if (j == level.rows - 1) {
-        checkcluster = true;
-      } else {
-        if (
-          level.tiles[i][j].type == level.tiles[i][j + 1].type &&
-          level.tiles[i][j].type != -1
-        ) {
-          matchlength += 1;
-        } else {
+        if (i == level.columns - 1) {
           checkcluster = true;
-        }
-      }
-
-      if (checkcluster) {
-        if (matchlength >= 3) {
-          clusters.push({
-            column: i,
-            row: j + 1 - matchlength,
-            length: matchlength,
-            horizontal: false,
-          });
+        } else {
+          if (
+            level.tiles[i][j].type == level.tiles[i + 1][j].type &&
+            level.tiles[i][j].type != -1
+          ) {
+            matchlength += 1;
+          } else {
+            checkcluster = true;
+          }
         }
 
-        matchlength = 1;
+        if (checkcluster) {
+          if (matchlength >= 3) {
+            clusters.push({
+              column: i + 1 - matchlength,
+              row: j,
+              length: matchlength,
+              horizontal: true,
+            });
+          }
+
+          matchlength = 1;
+        }
+      }
+    }
+
+    for (var i = 0; i < level.columns; i++) {
+      var matchlength = 1;
+      for (var j = 0; j < level.rows; j++) {
+        var checkcluster = false;
+
+        if (j == level.rows - 1) {
+          checkcluster = true;
+        } else {
+          if (
+            level.tiles[i][j].type == level.tiles[i][j + 1].type &&
+            level.tiles[i][j].type != -1
+          ) {
+            matchlength += 1;
+          } else {
+            checkcluster = true;
+          }
+        }
+
+        if (checkcluster) {
+          if (matchlength >= 3) {
+            clusters.push({
+              column: i,
+              row: j + 1 - matchlength,
+              length: matchlength,
+              horizontal: false,
+            });
+          }
+
+          matchlength = 1;
+        }
       }
     }
   }
-}
 
-// AVAILABLE MOVES
-function findMoves() {
-  moves = [];
+  // AVAILABLE MOVES
+  function findMoves() {
+    moves = [];
 
-  for (var j = 0; j < level.rows; j++) {
-    for (var i = 0; i < level.columns - 1; i++) {
-      swap(i, j, i + 1, j);
-      findClusters();
-      swap(i, j, i + 1, j);
+    for (var j = 0; j < level.rows; j++) {
+      for (var i = 0; i < level.columns - 1; i++) {
+        swap(i, j, i + 1, j);
+        findClusters();
+        swap(i, j, i + 1, j);
 
-      if (clusters.length > 0) {
-        moves.push({ column1: i, row1: j, column2: i + 1, row2: j });
+        if (clusters.length > 0) {
+          moves.push({ column1: i, row1: j, column2: i + 1, row2: j });
+        }
+      }
+    }
+
+    for (var i = 0; i < level.columns; i++) {
+      for (var j = 0; j < level.rows - 1; j++) {
+        swap(i, j, i, j + 1);
+        findClusters();
+        swap(i, j, i, j + 1);
+
+        if (clusters.length > 0) {
+          moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
+        }
+      }
+    }
+
+    clusters = [];
+  }
+
+  function loopClusters(func) {
+    for (var i = 0; i < clusters.length; i++) {
+      var cluster = clusters[i];
+      var coffset = 0;
+      var roffset = 0;
+      for (var j = 0; j < cluster.length; j++) {
+        func(i, cluster.column + coffset, cluster.row + roffset, cluster);
+
+        if (cluster.horizontal) {
+          coffset++;
+        } else {
+          roffset++;
+        }
       }
     }
   }
 
-  for (var i = 0; i < level.columns; i++) {
-    for (var j = 0; j < level.rows - 1; j++) {
-      swap(i, j, i, j + 1);
-      findClusters();
-      swap(i, j, i, j + 1);
+  // AUTO CLEAR CLUSTERS
+  function removeClusters() {
+    loopClusters(function (index, column, row, cluster) {
+      level.tiles[column][row].type = -1;
+    });
 
-      if (clusters.length > 0) {
-        moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
+    for (var i = 0; i < level.columns; i++) {
+      var shift = 0;
+      for (var j = level.rows - 1; j >= 0; j--) {
+        if (level.tiles[i][j].type == -1) {
+          shift++;
+          level.tiles[i][j].shift = 0;
+        } else {
+          level.tiles[i][j].shift = shift;
+        }
       }
     }
   }
 
-  clusters = [];
-}
+  function shiftTiles() {
+    for (var i = 0; i < level.columns; i++) {
+      for (var j = level.rows - 1; j >= 0; j--) {
+        if (level.tiles[i][j].type == -1) {
+          level.tiles[i][j].type = getRandomTile();
+        } else {
+          var shift = level.tiles[i][j].shift;
+          if (shift > 0) {
+            swap(i, j, i, j + shift);
+          }
+        }
 
-function loopClusters(func) {
-  for (var i = 0; i < clusters.length; i++) {
-    var cluster = clusters[i];
-    var coffset = 0;
-    var roffset = 0;
-    for (var j = 0; j < cluster.length; j++) {
-      func(i, cluster.column + coffset, cluster.row + roffset, cluster);
-
-      if (cluster.horizontal) {
-        coffset++;
-      } else {
-        roffset++;
-      }
-    }
-  }
-}
-
-// AUTO CLEAR CLUSTERS
-function removeClusters() {
-  loopClusters(function (index, column, row, cluster) {
-    level.tiles[column][row].type = -1;
-  });
-
-  for (var i = 0; i < level.columns; i++) {
-    var shift = 0;
-    for (var j = level.rows - 1; j >= 0; j--) {
-      if (level.tiles[i][j].type == -1) {
-        shift++;
         level.tiles[i][j].shift = 0;
-      } else {
-        level.tiles[i][j].shift = shift;
       }
     }
   }
-}
 
-function shiftTiles() {
-  for (var i = 0; i < level.columns; i++) {
-    for (var j = level.rows - 1; j >= 0; j--) {
-      if (level.tiles[i][j].type == -1) {
-        level.tiles[i][j].type = getRandomTile();
-      } else {
-        var shift = level.tiles[i][j].shift;
-        if (shift > 0) {
-          swap(i, j, i, j + shift);
-        }
-      }
+  function getMouseTile(pos) {
+    var tx = Math.floor((pos.x - level.x) / level.tilewidth);
+    var ty = Math.floor((pos.y - level.y) / level.tileheight);
 
-      level.tiles[i][j].shift = 0;
+    if (tx >= 0 && tx < level.columns && ty >= 0 && ty < level.rows) {
+      return {
+        valid: true,
+        x: tx,
+        y: ty,
+      };
     }
-  }
-}
 
-function getMouseTile(pos) {
-  var tx = Math.floor((pos.x - level.x) / level.tilewidth);
-  var ty = Math.floor((pos.y - level.y) / level.tileheight);
-
-  if (tx >= 0 && tx < level.columns && ty >= 0 && ty < level.rows) {
     return {
-      valid: true,
-      x: tx,
-      y: ty,
+      valid: false,
+      x: 0,
+      y: 0,
     };
   }
 
-  return {
-    valid: false,
-    x: 0,
-    y: 0,
-  };
-}
-
-function canSwap(x1, y1, x2, y2) {
-  if (
-    (Math.abs(x1 - x2) == 1 && y1 == y2) ||
-    (Math.abs(y1 - y2) == 1 && x1 == x2)
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-function swap(x1, y1, x2, y2) {
-  var typeswap = level.tiles[x1][y1].type;
-  level.tiles[x1][y1].type = level.tiles[x2][y2].type;
-  level.tiles[x2][y2].type = typeswap;
-}
-
-function mouseSwap(c1, r1, c2, r2) {
-  currentmove = { column1: c1, row1: r1, column2: c2, row2: r2 };
-
-  level.selectedtile.selected = false;
-
-  animationstate = 2;
-  animationtime = 0;
-  gamestate = gamestates.resolve;
-}
-
-function onMouseMove(e) {
-  var pos = getMousePos(canvas, e);
-
-  if (drag && level.selectedtile.selected) {
-    mt = getMouseTile(pos);
-    if (mt.valid) {
-
-      if (
-        canSwap(mt.x, mt.y, level.selectedtile.column, level.selectedtile.row)
-      ) {
-        mouseSwap(
-          mt.x,
-          mt.y,
-          level.selectedtile.column,
-          level.selectedtile.row
-        );
-      }
+  function canSwap(x1, y1, x2, y2) {
+    if (
+      (Math.abs(x1 - x2) == 1 && y1 == y2) ||
+      (Math.abs(y1 - y2) == 1 && x1 == x2)
+    ) {
+      return true;
     }
+
+    return false;
   }
-}
 
-function onMouseDown(e) {
-  var pos = getMousePos(canvas, e);
+  function swap(x1, y1, x2, y2) {
+    var typeswap = level.tiles[x1][y1].type;
+    level.tiles[x1][y1].type = level.tiles[x2][y2].type;
+    level.tiles[x2][y2].type = typeswap;
+  }
 
-  if (!drag) {
-    mt = getMouseTile(pos);
+  function mouseSwap(c1, r1, c2, r2) {
+    currentmove = { column1: c1, row1: r1, column2: c2, row2: r2 };
 
-    if (mt.valid) {
-      var swapped = false;
-      if (level.selectedtile.selected) {
+    level.selectedtile.selected = false;
+
+    animationstate = 2;
+    animationtime = 0;
+    gamestate = gamestates.resolve;
+  }
+
+  function onMouseMove(e) {
+    var pos = getMousePos(canvas, e);
+
+    if (drag && level.selectedtile.selected) {
+      mt = getMouseTile(pos);
+      if (mt.valid) {
         if (
-          mt.x == level.selectedtile.column &&
-          mt.y == level.selectedtile.row
-        ) {
-          level.selectedtile.selected = false;
-          drag = true;
-          return;
-        } else if (
-          canSwap(
-            mt.x,
-            mt.y,
-            level.selectedtile.column,
-            level.selectedtile.row
-          )
+          canSwap(mt.x, mt.y, level.selectedtile.column, level.selectedtile.row)
         ) {
           mouseSwap(
             mt.x,
@@ -682,60 +643,94 @@ function onMouseDown(e) {
             level.selectedtile.column,
             level.selectedtile.row
           );
-          swapped = true;
         }
       }
-
-      if (!swapped) {
-        level.selectedtile.column = mt.x;
-        level.selectedtile.row = mt.y;
-        level.selectedtile.selected = true;
-      }
-    } else {
-      level.selectedtile.selected = false;
-    }
-
-    drag = true;
-  }
-
-  for (var i = 0; i < buttons.length; i++) {
-    if (
-      pos.x >= buttons[i].x &&
-      pos.x < buttons[i].x + buttons[i].width &&
-      pos.y >= buttons[i].y &&
-      pos.y < buttons[i].y + buttons[i].height
-    ) {
-      if (i == 0) {
-        newGame();
-      } else if (i == 1) {
-        showmoves = !showmoves;
-        buttons[i].text = (showmoves ? "Hide" : "Show") + " Moves";
-      }
     }
   }
-}
 
-function onMouseUp(e) {
-  drag = false;
-}
+  function onMouseDown(e) {
+    var pos = getMousePos(canvas, e);
 
-function onMouseOut(e) {
-  drag = false;
-}
+    if (!drag) {
+      mt = getMouseTile(pos);
 
-function getMousePos(canvas, e) {
-  var rect = canvas.getBoundingClientRect();
-  return {
-    x: Math.round(
-      ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
-    ),
-    y: Math.round(
-      ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
-    ),
-  };
-}
+      if (mt.valid) {
+        var swapped = false;
+        if (level.selectedtile.selected) {
+          if (
+            mt.x == level.selectedtile.column &&
+            mt.y == level.selectedtile.row
+          ) {
+            level.selectedtile.selected = false;
+            drag = true;
+            return;
+          } else if (
+            canSwap(
+              mt.x,
+              mt.y,
+              level.selectedtile.column,
+              level.selectedtile.row
+            )
+          ) {
+            mouseSwap(
+              mt.x,
+              mt.y,
+              level.selectedtile.column,
+              level.selectedtile.row
+            );
+            swapped = true;
+          }
+        }
 
-// INITIAL START
-init();
+        if (!swapped) {
+          level.selectedtile.column = mt.x;
+          level.selectedtile.row = mt.y;
+          level.selectedtile.selected = true;
+        }
+      } else {
+        level.selectedtile.selected = false;
+      }
 
+      drag = true;
+    }
+
+    for (var i = 0; i < buttons.length; i++) {
+      if (
+        pos.x >= buttons[i].x &&
+        pos.x < buttons[i].x + buttons[i].width &&
+        pos.y >= buttons[i].y &&
+        pos.y < buttons[i].y + buttons[i].height
+      ) {
+        if (i == 0) {
+          newGame();
+        } else if (i == 1) {
+          showmoves = !showmoves;
+          buttons[i].text = (showmoves ? "Hide" : "Show") + " Moves";
+        }
+      }
+    }
+  }
+
+  function onMouseUp(e) {
+    drag = false;
+  }
+
+  function onMouseOut(e) {
+    drag = false;
+  }
+
+  function getMousePos(canvas, e) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: Math.round(
+        ((e.clientX - rect.left) / (rect.right - rect.left)) * canvas.width
+      ),
+      y: Math.round(
+        ((e.clientY - rect.top) / (rect.bottom - rect.top)) * canvas.height
+      ),
+    };
+  }
+
+  // INITIAL START
+  init();
 };
