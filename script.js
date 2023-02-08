@@ -501,4 +501,52 @@ function findClusters() {
   }
 }
 
+// AVAILABLE MOVES
+function findMoves() {
+  moves = [];
+
+  for (var j = 0; j < level.rows; j++) {
+    for (var i = 0; i < level.columns - 1; i++) {
+      swap(i, j, i + 1, j);
+      findClusters();
+      swap(i, j, i + 1, j);
+
+      if (clusters.length > 0) {
+        moves.push({ column1: i, row1: j, column2: i + 1, row2: j });
+      }
+    }
+  }
+
+  for (var i = 0; i < level.columns; i++) {
+    for (var j = 0; j < level.rows - 1; j++) {
+      swap(i, j, i, j + 1);
+      findClusters();
+      swap(i, j, i, j + 1);
+
+      if (clusters.length > 0) {
+        moves.push({ column1: i, row1: j, column2: i, row2: j + 1 });
+      }
+    }
+  }
+
+  clusters = [];
+}
+
+function loopClusters(func) {
+  for (var i = 0; i < clusters.length; i++) {
+    var cluster = clusters[i];
+    var coffset = 0;
+    var roffset = 0;
+    for (var j = 0; j < cluster.length; j++) {
+      func(i, cluster.column + coffset, cluster.row + roffset, cluster);
+
+      if (cluster.horizontal) {
+        coffset++;
+      } else {
+        roffset++;
+      }
+    }
+  }
+}
+
 };
