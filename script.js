@@ -38,6 +38,119 @@ window.onload = function () {
   var showmoves = false;
   var gameover = false;
 
+    // BUTTONS
+    var buttons = [
+      { x: 30, y: 240, width: 150, height: 50, text: "New Game" },
+      { x: 30, y: 300, width: 150, height: 50, text: "Show Moves" },
+    ];
+
+  // GAME INITIALIZATION FUNCTION
+  function init() {
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("mouseout", onMouseOut);
+
+    for (var i = 0; i < level.columns; i++) {
+      level.tiles[i] = [];
+      for (var j = 0; j < level.rows; j++) {
+        level.tiles[i][j] = { type: 0, shift: 0 };
+      }
+    }
+
+    // CALL NEW GAME
+    newGame();
+    main(0);
+  }
+
+  function main(tframe) {
+    window.requestAnimationFrame(main);
+
+    update(tframe);
+    render();
+  }
+
+  function update(tframe) {
+    var dt = (tframe - lastframe) / 1000;
+    lastframe = tframe;
+
+    if (gamestate == gamestates.ready) {
+
+      if (moves.length <= 0) {
+        gameover = true;
+      }
+    } else if (gamestate == gamestates.resolve) {
+      animationtime += dt;
+
+      if (animationstate == 0) {
+        if (animationtime > animationtimetotal) {
+          findClusters();
+
+          if (clusters.length > 0) {
+            for (var i = 0; i < clusters.length; i++) {
+              score += 100 * (clusters[i].length - 2);
+            }
+
+            removeClusters();
+
+            animationstate = 1;
+          } else {
+            gamestate = gamestates.ready;
+          }
+          animationtime = 0;
+        }
+      } else if (animationstate == 1) {
+        if (animationtime > animationtimetotal) {
+          shiftTiles();
+
+          animationstate = 0;
+          animationtime = 0;
+
+          findClusters();
+          if (clusters.length <= 0) {
+            gamestate = gamestates.ready;
+          }
+        }
+      } else if (animationstate == 2) {
+        if (animationtime > animationtimetotal) {
+          swap(
+            currentmove.column1,
+            currentmove.row1,
+            currentmove.column2,
+            currentmove.row2
+          );
+
+          findClusters();
+          if (clusters.length > 0) {
+            animationstate = 0;
+            animationtime = 0;
+            gamestate = gamestates.resolve;
+          } else {
+            animationstate = 3;
+            animationtime = 0;
+          }
+
+          findMoves();
+          findClusters();
+        }
+      } else if (animationstate == 3) {
+        if (animationtime > animationtimetotal) {
+          swap(
+            currentmove.column1,
+            currentmove.row1,
+            currentmove.column2,
+            currentmove.row2
+          );
+
+          gamestate = gamestates.ready;
+        }
+      }
+
+      findMoves();
+      findClusters();
+    }
+  }
+
   function drawCenterText(text, x, y, width) {
     var textdim = context.measureText(text);
     context.fillText(text, x + (width - textdim.width) / 2, y);
