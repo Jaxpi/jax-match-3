@@ -332,4 +332,59 @@ window.onload = function () {
       }
     }
   }
+
+  function getTileCoordinate(column, row, columnoffset, rowoffset) {
+    var tilex = level.x + (column + columnoffset) * level.tilewidth;
+    var tiley = level.y + (row + rowoffset) * level.tileheight;
+    return { tilex: tilex, tiley: tiley };
+  }
+
+  function drawTile(x, y, r, g, b) {
+    context.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+    context.fillRect(x + 2, y + 2, level.tilewidth - 4, level.tileheight - 4);
+  }
+
+  function renderClusters() {
+    for (var i = 0; i < clusters.length; i++) {
+      var coord = getTileCoordinate(clusters[i].column, clusters[i].row, 0, 0);
+
+      if (clusters[i].horizontal) {
+        context.fillStyle = "white";
+        context.fillRect(
+          coord.tilex,
+          coord.tiley,
+          (clusters[i].length) * level.tilewidth,
+          40
+        );
+      } else {
+        context.fillStyle = "white";
+        context.fillRect(
+          coord.tilex,
+          coord.tiley,
+          40,
+          (clusters[i].length) * level.tileheight
+        );
+      }
+    }
+  }
+
+  function renderMoves() {
+    for (var i = 0; i < moves.length; i++) {
+      var coord1 = getTileCoordinate(moves[i].column1, moves[i].row1, 0, 0);
+      var coord2 = getTileCoordinate(moves[i].column2, moves[i].row2, 0, 0);
+
+      context.strokeStyle = "white";
+      context.beginPath();
+      context.moveTo(
+        coord1.tilex + level.tilewidth / 2,
+        coord1.tiley + level.tileheight / 2
+      );
+      context.lineTo(
+        coord2.tilex + level.tilewidth / 2,
+        coord2.tiley + level.tileheight / 2
+      );
+      context.stroke();
+    }
+  }
+
 };
